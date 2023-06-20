@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/usuarios")
+@RequestMapping("/api/v1/usuarios")
 @Tag(name = "Usuários", description = "API para gerenciamento de usuários")
 public class UsuarioController {
 
