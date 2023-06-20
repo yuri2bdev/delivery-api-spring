@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/pedidos")
+@RequestMapping("/api/v1/pedidos")
 @Tag(name = "Pedidos", description = "API para gerenciamento de pedidos")
 public class PedidoController {
 
