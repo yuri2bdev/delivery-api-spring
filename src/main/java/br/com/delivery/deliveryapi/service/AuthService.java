@@ -1,54 +1,57 @@
 package br.com.delivery.deliveryapi.service;
 
+
+import br.com.delivery.deliveryapi.controller.RegisterRequest;
+import br.com.delivery.deliveryapi.dto.AuthenticationResponse;
+import br.com.delivery.deliveryapi.dto.LoginRequest;
 import br.com.delivery.deliveryapi.model.Usuario;
+import br.com.delivery.deliveryapi.repository.UsuarioRepository;
 import br.com.delivery.deliveryapi.security.JwtProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.Optional;
+
 
 @Service
-public class AuthService implements UserDetailsService {
-
-    private final AuthenticationManager authenticationManager;
-    private final JwtProvider jwtProvider;
-    private final UsuarioService usuarioService;
+public class AuthService {
 
     @Autowired
-    public AuthService(AuthenticationManager authenticationManager,
-                       JwtProvider jwtProvider,
-                       UsuarioService usuarioService) {
-        this.authenticationManager = authenticationManager;
-        this.jwtProvider = jwtProvider;
-        this.usuarioService = usuarioService;
+    private UsuarioRepository userRepository;
+    @Autowired
+    PasswordEncoder passwordEncoder;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private JwtProvider jwtProvider;
+
+    public void signup(@RequestBody RegisterRequest registerRequest) {
+        Usuario user = new Usuario();
+        user.setUsername (registerRequest.getUsername());
+        user.setPassword (this.passwordEncoder.encode(registerRequest.getPassword()));
+        user.setEmail(registerRequest.getEmail());
+        user.setTelefone(registerRequest.getTelefone());
+        userRepository.save(user);
     }
 
-    public String authenticate(String username, String password) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password)
-        );
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        return jwtProvider.generateToken(authentication);
+    public AuthenticationResponse login(LoginRequest loginRequest) {
+        Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+                loginRequest.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authenticate);
+        String authenticationToken = jwtProvider.generateToken(authenticate);
+        Optional<Usuario> userOptional = Optional.ofNullable(this.userRepository.findByUsername(loginRequest.getUsername()));
+        Usuario user = userOptional.orElseThrow(() -> new UsernameNotFoundException("Nenhum usuário encontrado para o login: " + loginRequest.getUsername()));
+        return new AuthenticationResponse(authenticationToken, user.getUsername());
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Usuario usuario = usuarioService.obterUsuarioPorUsername(username);
-        if (usuario == null) {
-            throw new UsernameNotFoundException("Usuário não encontrado: " + username);
-        }
-
-        return User.builder()
-                .username(usuario.getUsername())
-                .password(usuario.getPassword())
-                .roles("USER")
-                .build();
+    public Optional<Usuario> getUserByUsername(String username) {
+        return Optional.ofNullable(this.userRepository.findByUsername(username));
     }
 }
