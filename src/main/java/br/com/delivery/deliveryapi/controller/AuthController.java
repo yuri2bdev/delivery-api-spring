@@ -1,34 +1,47 @@
 package br.com.delivery.deliveryapi.controller;
 
+
+import br.com.delivery.deliveryapi.dto.AuthenticationResponse;
+import br.com.delivery.deliveryapi.dto.LoginRequest;
+import br.com.delivery.deliveryapi.model.Usuario;
 import br.com.delivery.deliveryapi.service.AuthService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
+
 
 @RestController
-@RequestMapping("/api/auth")
-@Tag(name = "Autenticação", description = "API para autenticação de usuarios")
+@RequestMapping("api/v1/auth")
+@Tag(name = "Auth", description = "API de Autentificação")
 public class AuthController {
-
-    private final AuthService authService;
-
     @Autowired
-    public AuthController(AuthService authService) {
-        this.authService = authService;
+    private AuthService authService;
+
+    @PostMapping("/signup")
+    public ResponseEntity signup(@RequestBody RegisterRequest registerRequest) {
+        this.authService.signup(registerRequest);
+        return new ResponseEntity(HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Autenticar usuário e gerar token JWT")
-    public ResponseEntity<String> login(
-            @Parameter(description = "Nome de usuário") @RequestParam String username,
-            @Parameter(description = "Senha do usuário") @RequestParam String password) {
-        String token = authService.authenticate(username, password);
-        return ResponseEntity.ok(token);
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        try {
+            AuthenticationResponse response = authService.login(loginRequest);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
     }
+
+    @GetMapping("/getuser")
+    public Optional<Usuario> getUserByUsername(@RequestParam String username) {
+        return this.authService.getUserByUsername(username);
+    }
+
 }
+
