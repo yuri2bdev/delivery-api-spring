@@ -30,7 +30,7 @@ public class JwtProvider {
     public void init() {
         try {
             this.keyStore = KeyStore.getInstance("JKS");
-            InputStream resourceAsStream = getClass().getResourceAsStream("/portal.jks");
+            InputStream resourceAsStream = getClass().getResourceAsStream("/delivery.jks");
             this.keyStore.load(resourceAsStream, this.jksPass.toCharArray());
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
             throw new RuntimeException(e);
@@ -39,6 +39,7 @@ public class JwtProvider {
 
     public String generateToken(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
+        Key privateKey = getPrivateKey();
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .setIssuedAt(new Date())
@@ -47,11 +48,11 @@ public class JwtProvider {
                                 LocalDateTime.now().plusMinutes(Long.parseLong(this.EXPIRATION_TIME))
                                         .atZone(ZoneId.systemDefault())
                                         .toInstant()))
-                .signWith(getPrivateKey())
+                .signWith(SignatureAlgorithm.RS256, privateKey)
                 .compact();
     }
 
-    private Key getPrivateKey() {
+    private PrivateKey getPrivateKey() {
         try {
             return (PrivateKey) this.keyStore.getKey("delivery", this.jksPass.toCharArray());
         } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
