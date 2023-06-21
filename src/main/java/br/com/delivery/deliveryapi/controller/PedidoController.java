@@ -2,10 +2,10 @@ package br.com.delivery.deliveryapi.controller;
 
 import br.com.delivery.deliveryapi.model.Pedido;
 import br.com.delivery.deliveryapi.service.PedidoService;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
