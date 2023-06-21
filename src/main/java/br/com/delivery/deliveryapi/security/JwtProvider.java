@@ -30,7 +30,7 @@ public class JwtProvider {
     public void init() {
         try {
             this.keyStore = KeyStore.getInstance("JKS");
-            InputStream resourceAsStream = getClass().getResourceAsStream("/delivery.jks");
+            InputStream resourceAsStream = getClass().getResourceAsStream("/portal.jks");
             this.keyStore.load(resourceAsStream, this.jksPass.toCharArray());
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
             throw new RuntimeException(e);
@@ -47,30 +47,30 @@ public class JwtProvider {
                                 LocalDateTime.now().plusMinutes(Long.parseLong(this.EXPIRATION_TIME))
                                         .atZone(ZoneId.systemDefault())
                                         .toInstant()))
-                .signWith(SignatureAlgorithm.RS256, getPrivateKey())
+                .signWith(getPrivateKey())
                 .compact();
     }
 
     private Key getPrivateKey() {
         try {
             return (PrivateKey) this.keyStore.getKey("delivery", this.jksPass.toCharArray());
-        } catch (KeyStoreException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        } catch (UnrecoverableKeyException e) {
+        } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
             throw new RuntimeException(e);
         }
     }
 
     public boolean validateToken(String jwt) {
-        Jwts.parser().setSigningKey(getPublicKey()).parseClaimsJws(jwt);
-        return true;
+        try {
+            Jwts.parser().setSigningKey(getPublicKey()).parseClaimsJws(jwt);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private PublicKey getPublicKey() {
         try {
-            return this.keyStore.getCertificate("mira").getPublicKey();
+            return this.keyStore.getCertificate("portal").getPublicKey();
         } catch (KeyStoreException e) {
             throw new RuntimeException(e);
         }
@@ -83,5 +83,4 @@ public class JwtProvider {
                 .getBody();
         return claims.getSubject();
     }
-
 }
