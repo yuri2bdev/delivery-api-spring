@@ -30,7 +30,7 @@ public class PedidoService {
         Pedido pedidoExistente = pedidoRepository.findById(id).orElse(null);
         if (pedidoExistente != null) {
             pedidoExistente.setDescricao(pedido.getDescricao());
-            pedidoExistente.setCliente(clienteService.obterClientePorId(pedido.getCliente().getId()));
+            pedidoExistente.setCliente(clienteService.obterClientePorId(pedido.getCliente().getIdCliente()));
             pedidoRepository.save(pedidoExistente);
         }
     }
