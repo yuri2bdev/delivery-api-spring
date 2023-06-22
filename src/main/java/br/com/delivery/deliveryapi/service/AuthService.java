@@ -1,7 +1,7 @@
 package br.com.delivery.deliveryapi.service;
 
 
-import br.com.delivery.deliveryapi.controller.RegisterRequest;
+import br.com.delivery.deliveryapi.dto.RegisterRequest;
 import br.com.delivery.deliveryapi.dto.AuthenticationResponse;
 import br.com.delivery.deliveryapi.dto.LoginRequest;
 import br.com.delivery.deliveryapi.model.Usuario;
@@ -24,9 +24,9 @@ import java.util.Optional;
 public class AuthService {
 
     @Autowired
-    private UsuarioRepository userRepository;
-    @Autowired
     PasswordEncoder passwordEncoder;
+    @Autowired
+    private UsuarioRepository userRepository;
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
@@ -34,8 +34,8 @@ public class AuthService {
 
     public void signup(@RequestBody RegisterRequest registerRequest) {
         Usuario user = new Usuario();
-        user.setUsername (registerRequest.getUsername());
-        user.setPassword (this.passwordEncoder.encode(registerRequest.getPassword()));
+        user.setUsername(registerRequest.getUsername());
+        user.setPassword(this.passwordEncoder.encode(registerRequest.getPassword()));
         user.setEmail(registerRequest.getEmail());
         user.setTelefone(registerRequest.getTelefone());
         userRepository.save(user);
