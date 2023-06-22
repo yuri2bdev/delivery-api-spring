@@ -30,7 +30,7 @@ public class EntregaService {
         Entrega entregaExistente = entregaRepository.findById(id).orElse(null);
         if (entregaExistente != null) {
             entregaExistente.setEndereco(entrega.getEndereco());
-            entregaExistente.setPedido(pedidoService.obterPedidoPorId(entrega.getPedido().getId()));
+            entregaExistente.setPedido(pedidoService.obterPedidoPorId(entrega.getPedido().getIdPedido()));
             entregaRepository.save(entregaExistente);
         }
     }
